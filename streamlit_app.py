@@ -30,11 +30,13 @@ TAX = st.number_input('TAX (Property tax rate):', min_value=0.0)
 PTRATIO = st.number_input('PTRATIO (Pupil-teacher ratio):', min_value=0.0)
 B = st.number_input('B (1000(Bk - 0.63)^2):', min_value=0.0)
 LSTAT = st.number_input('LSTAT (% lower status population):', min_value=0.0)
+RM_LSTAT = st.number_input('RM_LSTAT (mix of rm and LSTAT):', min_value=0.0)
+RM_AGE = st.number_input('RM_AGE (mix of rm and age):', min_value=0.0)
 
 # Predict Button
 if st.button('Predict'):
     # Prepare input for prediction
-    input_data = np.array([[CRIM, ZN, INDUS, CHAS, NOX, RM, AGE, DIS, RAD, TAX, PTRATIO, B, LSTAT]])
+    input_data = np.array([[CRIM, ZN, INDUS, CHAS, NOX, RM, AGE, DIS, RAD, TAX, PTRATIO, B, LSTAT ,RM_LSTAT, RM_AGE]])
     scaled_data = scaler.transform(input_data)
     prediction = model.predict(scaled_data)
 
