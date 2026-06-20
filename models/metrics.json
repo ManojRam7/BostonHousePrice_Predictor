@@ -1,0 +1,27 @@
+{
+  "dataset": "processed_housing_data.csv",
+  "n_rows": 490,
+  "n_features": 15,
+  "feature_columns": [
+    "CRIM",
+    "ZN",
+    "INDUS",
+    "CHAS",
+    "NOX",
+    "RM",
+    "AGE",
+    "DIS",
+    "RAD",
+    "TAX",
+    "PTRATIO",
+    "B",
+    "LSTAT",
+    "RM_LSTAT",
+    "RM_AGE"
+  ],
+  "metrics": {
+    "rmse": 2.5771897426148,
+    "mae": 1.9203031964002637,
+    "r2": 0.8699841335969279
+  }
+}

@@ -1,43 +1,105 @@
+from __future__ import annotations
+
+import subprocess
+import sys
+from pathlib import Path
+
 import streamlit as st
-import pickle
-import numpy as np
 
-# Load model and scaler
-with open('regmodel.pkl', 'rb') as model_file:
-    model = pickle.load(model_file)
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-with open('scaling.pkl', 'rb') as scaler_file:
-    scaler = pickle.load(scaler_file)
+from boston_house_price_predictor.config import MODEL_PATH
+from boston_house_price_predictor.inference import MissingArtifactError, predict_price
 
-# Streamlit App
-st.title('Boston House Price Predictor')
 
-st.markdown("""
-Provide the required inputs to predict the price of a house.
-""")
+st.set_page_config(page_title="Boston House Price Predictor", layout="wide")
 
-# Input Fields
-CRIM = st.number_input('CRIM (Per capita crime rate):', min_value=0.0)
-ZN = st.number_input('ZN (Proportion of residential land):', min_value=0.0)
-INDUS = st.number_input('INDUS (Non-retail business acres):', min_value=0.0)
-CHAS = st.selectbox('CHAS (Charles River proximity):', [0, 1])
-NOX = st.number_input('NOX (Nitric oxide concentration):', min_value=0.0)
-RM = st.number_input('RM (Number of rooms):', min_value=0.0)
-AGE = st.number_input('AGE (Proportion of older units):', min_value=0.0)
-DIS = st.number_input('DIS (Weighted distance):', min_value=0.0)
-RAD = st.number_input('RAD (Accessibility to highways):', min_value=0.0)
-TAX = st.number_input('TAX (Property tax rate):', min_value=0.0)
-PTRATIO = st.number_input('PTRATIO (Pupil-teacher ratio):', min_value=0.0)
-B = st.number_input('B (1000(Bk - 0.63)^2):', min_value=0.0)
-LSTAT = st.number_input('LSTAT (% lower status population):', min_value=0.0)
-RM_LSTAT = st.number_input('RM_LSTAT (mix of rm and LSTAT):', min_value=0.0)
-RM_AGE = st.number_input('RM_AGE (mix of rm and age):', min_value=0.0)
+st.markdown(
+    """
+    <style>
+    .hero {
+      border-radius: 14px;
+      padding: 1.1rem 1.3rem;
+      background: linear-gradient(90deg, #F9D976 0%, #F39F86 100%);
+      color: #1D1D1D;
+      margin-bottom: 1rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# Predict Button
-if st.button('Predict'):
-    # Prepare input for prediction
-    input_data = np.array([[CRIM, ZN, INDUS, CHAS, NOX, RM, AGE, DIS, RAD, TAX, PTRATIO, B, LSTAT ,RM_LSTAT, RM_AGE]])
-    scaled_data = scaler.transform(input_data)
-    prediction = model.predict(scaled_data)
+st.markdown(
+    """
+    <div class="hero">
+      <h2 style="margin:0;">Boston House Price Predictor</h2>
+      <p style="margin:0.4rem 0 0 0;">Portfolio-grade inference app built on a reproducible sklearn training pipeline.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-    st.success(f'Estimated House Price: ${prediction[0]:,.2f}')
+if not MODEL_PATH.exists():
+    st.warning("Model artifact is missing. Train it first with: python scripts/train_model.py")
+    if st.button("Run training now"):
+        result = subprocess.run(
+            [sys.executable, "scripts/train_model.py"],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            st.success("Model trained successfully. Reload to begin predictions.")
+        else:
+            st.error("Training failed.")
+            st.code(result.stderr or result.stdout)
+
+left, right = st.columns(2)
+
+with left:
+    st.subheader("Property and Location Inputs")
+    crim = st.number_input("CRIM", value=0.10, help="Per capita crime rate by town")
+    zn = st.number_input("ZN", value=0.0, help="Residential land zoned proportion")
+    indus = st.number_input("INDUS", value=8.0, help="Non-retail business acres proportion")
+    chas = st.selectbox("CHAS", [0, 1], help="1 if tract bounds Charles River")
+    nox = st.number_input("NOX", value=0.50, help="Nitric oxides concentration")
+    rm = st.number_input("RM", value=6.2, help="Average rooms per dwelling")
+    age = st.number_input("AGE", value=65.0, help="Proportion of older owner-occupied units")
+
+with right:
+    st.subheader("Accessibility and Socio-economic Inputs")
+    dis = st.number_input("DIS", value=4.0, help="Weighted distance to employment centers")
+    rad = st.number_input("RAD", value=4.0, help="Accessibility index to radial highways")
+    tax = st.number_input("TAX", value=300.0, help="Property-tax rate per $10,000")
+    ptratio = st.number_input("PTRATIO", value=18.0, help="Pupil-teacher ratio")
+    b = st.number_input("B", value=390.0, help="1000(Bk - 0.63)^2")
+    lstat = st.number_input("LSTAT", value=12.0, help="Percentage lower status population")
+
+if st.button("Predict Price", type="primary"):
+    payload = {
+        "CRIM": float(crim),
+        "ZN": float(zn),
+        "INDUS": float(indus),
+        "CHAS": int(chas),
+        "NOX": float(nox),
+        "RM": float(rm),
+        "AGE": float(age),
+        "DIS": float(dis),
+        "RAD": float(rad),
+        "TAX": float(tax),
+        "PTRATIO": float(ptratio),
+        "B": float(b),
+        "LSTAT": float(lstat),
+    }
+
+    try:
+        estimate = predict_price(payload)
+        st.success(f"Estimated house price: ${estimate * 1000:,.2f}")
+        st.caption("Prediction unit: USD (dataset target MEDV is in $1000s).")
+    except MissingArtifactError as error:
+        st.error(str(error))
+    except Exception as error:
+        st.error(f"Prediction failed: {error}")

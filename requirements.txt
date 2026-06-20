@@ -1,6 +1,7 @@
-streamlit
-Flask
-scikit-learn
-pandas
+joblib
 numpy
+pandas
+scikit-learn
+streamlit
 matplotlib
+seaborn
