@@ -1,68 +1,122 @@
 # Boston House Price Predictor
 
-Production-polished portfolio project for tabular regression: train, evaluate, and serve Boston house price predictions with a clean Python package and Streamlit UI.
+<p align="center">
+	<img src="https://img.shields.io/badge/Project-Data%20Science%20Portfolio-0E9F6E?style=for-the-badge" alt="Project Badge" />
+	<img src="https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Badge" />
+	<img src="https://img.shields.io/badge/Framework-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit Badge" />
+	<img src="https://img.shields.io/badge/ML-scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="Sklearn Badge" />
+</p>
 
-## Why This Project Is Portfolio Ready
+<p align="center">
+	End-to-end house price regression project with reproducible training, model artifact versioning, and a production-ready Streamlit inference interface.
+</p>
 
-- Reproducible training entrypoint (`scripts/train_model.py`)
-- Modular source package under `src/`
-- Saved model artifact + versioned metrics JSON
-- Streamlit app with robust error handling and on-demand training
-- Clear technical documentation (`README.md`, `PROJECT_STRUCTURE.md`, `MODEL_CARD.md`)
+## Project Highlights
+
+- Reproducible training workflow via `scripts/train_model.py`
+- Clean modular package architecture under `src/`
+- Automatic feature engineering (`RM_LSTAT`, `RM_AGE`)
+- Persisted model + metrics tracking in `models/`
+- Portfolio-grade documentation and model card
+
+## Model Performance Snapshot
+
+Latest metrics from `models/metrics.json`:
+
+- RMSE: `2.5772`
+- MAE: `1.9203`
+- R2: `0.8700`
 
 ## Tech Stack
 
-- Python 3.11+
-- pandas, numpy
-- scikit-learn
-- streamlit
-- joblib
+- Python, pandas, numpy
+- scikit-learn, joblib
+- Streamlit for deployment UI
+- matplotlib, seaborn for analysis support
 
-## Repository Layout
+## Folder Structure
 
-See detailed breakdown in `PROJECT_STRUCTURE.md`.
+```text
+BostonHousePrice_Predictor/
+|- processed_housing_data.csv
+|- streamlit_app.py
+|- scripts/
+|  |- train_model.py
+|- src/
+|  |- boston_house_price_predictor/
+|     |- config.py
+|     |- data.py
+|     |- features.py
+|     |- modeling.py
+|     |- train.py
+|     |- inference.py
+|- models/
+|  |- model_pipeline.joblib
+|  |- metrics.json
+|- PROJECT_STRUCTURE.md
+|- MODEL_CARD.md
+```
 
-Key entrypoints:
-
-- `scripts/train_model.py` - trains and stores artifacts in `models/`
-- `streamlit_app.py` - interactive web app for predictions
+Detailed architecture notes: `PROJECT_STRUCTURE.md`
 
 ## Quickstart
 
-1. Create and activate a virtual environment.
-2. Install dependencies:
+### 1) Create Environment
 
 ```bash
-pip install -r requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-3. Train the model:
+### 2) Install Dependencies
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+### 3) Train Model
 
 ```bash
 python scripts/train_model.py
 ```
 
-4. Launch the app:
+### 4) Run App
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-## Metrics and Artifacts
+## Input Features
 
-- Trained pipeline: `models/model_pipeline.joblib`
-- Evaluation metadata: `models/metrics.json`
+Base features used by the model:
 
-The metrics file stores RMSE, MAE, R2, and feature metadata for traceability.
+- CRIM, ZN, INDUS, CHAS, NOX, RM, AGE
+- DIS, RAD, TAX, PTRATIO, B, LSTAT
 
-## Data Notes
+Engineered features:
 
-- Training data file: `processed_housing_data.csv`
-- Target column: `MEDV` (in $1000s)
-- Engineered features are derived inside the pipeline workflow:
-	- `RM_LSTAT = RM * LSTAT`
-	- `RM_AGE = RM * AGE`
+- `RM_LSTAT = RM * LSTAT`
+- `RM_AGE = RM * AGE`
 
-## Ethics and Limitations
+Target:
 
-This is an educational and portfolio project. The Boston dataset includes historically sensitive socio-economic patterns and should not be used for real-world policy or lending decisions.
+- `MEDV` (median house value, in $1000s)
+
+## Production-Grade Notes
+
+- Data schema validation before training
+- Artifact existence checks before inference
+- In-app fallback for model training trigger
+- Explicit metrics export for experiment traceability
+
+## Ethics and Responsible Use
+
+This project is for education and portfolio demonstration. The Boston housing dataset contains historically sensitive socio-economic attributes and should not be used for real-world lending or policy decisions.
+
+## Authoring Tip
+
+For interviews and portfolio demos, showcase:
+
+- Your model development decisions in `House Price analysis.ipynb`
+- Reproducibility via `scripts/train_model.py`
+- Deployment/readiness via `streamlit_app.py`
